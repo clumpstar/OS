@@ -1,0 +1,175 @@
+c programs:
+1.
+#include <unistd.h>
+#include <stdio.h>
+#include <sys/wait.h>
+int main()
+{
+int pipe1fd [2];
+int fd;
+pipe(pipe1fd);
+fd=fork();
+switch(fd)
+{
+case 0:
+dup2(pipe1fd[1],1);
+close(pipe1fd[0]);
+execlp("pwd","pwd",NULL);
+default:
+dup2(pipe1fd[0],0);
+close(pipe1fd[1]);
+execlp("wc","wc",NULL);
+}
+return 0;
+}
+
+2.
+#include<unistd.h>
+#include<stdio.h>
+int main()
+{
+int fd1,fd2;
+int pfd1[2],pfd2[2];
+pipe(pfd1);
+pipe(pfd2);
+fd1=fork();
+if(fd1==0)
+{
+dup2(pfd1[1],1);
+execlp("ls","ls",NULL);
+}
+else
+{
+fd2=fork();
+if(fd2==0)
+{
+close(pfd1[1]);
+close(pfd2[0]);
+dup2(pfd1[0],0);
+dup2(pfd2[1],1);
+execlp("grep","grep","b",NULL);
+}
+else
+{
+close(pfd1[1]);
+close(pfd1[0]);
+close(pfd2[1]);
+dup2(pfd2[0],0);
+execlp("wc","wc","-l",NULL);
+}
+}
+}
+shell programs:
+-menu driven
+3.
+echo "1 cp"
+echo "2 mv"
+echo "3 ls"
+echo "4 Exit"
+
+
+while [ 1 ]
+do
+read choice
+case $choice in
+1)echo "Enter src file name"
+read src
+echo "Enter destination file name"
+read dest
+cp $src $dest
+;;
+2)mv f1 f3
+;;
+3)ls
+;;
+4)exit
+;;
+*)echo "invalid"
+esac
+
+echo "1 cp"
+echo "2 mv"
+echo "3 ls"
+echo "4 Exit"
+
+done
+
+
+-for loop
+4.
+for((i=1;i<=100;i++))
+do
+echo $i
+done
+
+5.
+for i in {2..100}
+do
+a=0
+for((j=1;j<=$i;j++))
+do
+r=$((i%j))
+if [ $r == "0" ]
+then
+a=$((a+1))
+fi
+done
+if [ $a == "2" ]
+then
+echo $i
+fi
+done
+
+
+-date
+6.
+date
+echo $1
+echo $2
+
+
+-commandline
+7.
+echo "Total number of arguments" $#
+cat p.txt
+for i in $*
+do
+echo "Filename" $i
+echo "contents"
+cat $i 2>>error.txt
+done
+
+echo $0
+
+
+8.
+if [ $# -ne 2 ]
+then
+echo "Invalid no of args"
+exit
+fi
+echo $1
+echo $2
+if [ -f $1 ]
+then
+if [ !-d$2 ]
+then
+cp $1 $2
+fi
+fi
+
+
+9.for i in $*
+do
+echo $i
+done
+
+
+
+
+
+
+
+
+
+
